@@ -52,6 +52,22 @@ for line in Lines:
 for i in range(len(cards)):
     print (f"card {i}: {num_wins[i]} wins")
 
+# alternate better solution
+card_count = list()
+for i in range(len(cards)):
+    card_count.append(i)
+    card_count[i] = 1
+
+sum = 0
+for idx in range(len(cards)):
+    wins = num_wins[idx]
+    if wins > 0:
+        for win in range(wins):
+            card_count[idx+win+1] += card_count[idx]
+    sum += card_count[idx]
+print (sum)
+
+# slower solution
 # post-process cards and wins
 new_card_indices = list()
 for i in range(len(cards)):
@@ -76,7 +92,7 @@ while idx < len(new_card_indices):
     #     print (f"{star}{i}: {cards[new_card_index]} wins {num_wins[new_card_index]}")
 
     idx += 1
-    if idx%1000 == 0:
-        print (f"# cards at {idx}: {len(new_card_indices)}")
+    # if idx%1000 == 0:
+    #     print (f"# cards at {idx}: {len(new_card_indices)}")
 
 print(len(new_card_indices))
