@@ -59,58 +59,114 @@ if is_mapping and len(mapping_list) > 0:
 
 print ("all done with parsing")
 
-# make new seed list
-# The lengths are way too big for this
-# solution.  I need to think of a different way
-# of solving this.
-new_seeds = list()
+# convert seeds list to list of ranges that
+# need to be converted to the next element
+seed_ranges = list()
 for idx in range(0, len(seeds), 2):
-    seed_start = seeds[idx]
-    seed_len = seeds[idx+1]
-    for i in range (seed_len):
-        new_seeds.append(seed_start+i)
+    seed_ranges.append([seeds[idx], seeds[idx+1]])
+
+def sort_list_of_lists(lst, index):
+    return sorted(lst, key=lambda x: x[index])
+
+# sort all seed ranges by 1st index
+new_seed_ranges = sort_list_of_lists (seed_ranges, 0)
+seed_ranges = new_seed_ranges
+ 
+# sort all mappings by 2nd index
+new_mappings = list()
+for mapping_list in mappings:
+    new_mapping_list = sort_list_of_lists(mapping_list, 1)
+    new_mappings.append(new_mapping_list)
+mappings = new_mappings
 
 # for each seed, find the location 
 # where it can be planted
 start_tag = "seed"
 from_tag = start_tag
 final_tag = "location"
-locations_for_seeds = list()
-for seed in new_seeds:
-    from_id = seed
-    from_tag = start_tag
-    print (f"Searching for location of seed: {seed}")
-    location_found = False
-    while not location_found:
-        # look for mapping index for from_tag-to-to_tag
-        for map_index in map_indices:
-            if map_index[0] == from_tag:
-                to_tag = map_index[1]
-                map_idx = map_index[2]
-                # print (f"  Found mapping from {from_tag} to {to_tag}")
-                # now get the id of the "to" target
-                to_id = -1
-                mymappings = mappings[map_idx]
-                for mymapping in mymappings:
-                    start_to_id = mymapping[0]
-                    start_from_id = mymapping[1]
-                    num_ids = mymapping[2]
-                    if start_from_id <= from_id < start_from_id+num_ids:
-                        diff = from_id - start_from_id
-                        to_id = start_to_id + diff
-                if to_id == -1:
-                    to_id = from_id
-                # print (f"  {from_id} maps to {to_id}")
-                break
-        if to_tag == final_tag:
-            location_found = True
-            locations_for_seeds.append(to_id)
-            print (f"  Location id of seed {seed} is {to_id}")
-        else:
-            # now move to next pair of items to look for
-            from_id = to_id
-            from_tag = to_tag
+start_ranges = seed_ranges
+location_found = False
 
-print (f"Minimum location is {min(locations_for_seeds)}")
+while not location_found:
+
+    print (f"Searching for idx of mapping from {from_tag}")
+
+    for map_index in map_indices:
+        if map_index[0] == from_tag:
+            to_tag = map_index[1]
+            map_idx = map_index[2]        
+            print (f"  Found index for mapping from {from_tag} to {to_tag}")
+
+            mymappings = mappings[map_idx]
+
+            processed_ranges = list()
+            unprocessed_ranges = start_ranges
+
+            # loop over all the "seed" ranges
+            while len(unprocessed_ranges) > 0:
+
+                # grab 1st range
+                myrange = unprocessed_ranges[0]
+                # remove it from the list!
+                del unprocessed_ranges[0]
+
+                print (f"    Processing range: {myrange[0]} to {myrange[0]+myrange[1]-1}")
+
+                did_process = False
+
+                # loop over all the "soil" mappings
+                for mymapping in mymappings:
+                    diff = mymapping[1]-mymapping[0]                    
+                    print (f"      Looking at mapping: {mymapping[1]} to {mymapping[1]+mymapping[2]-1} CONV {diff}")
+                    # find overlap between myrange (e.g. seed range) and mymapping (e.g. soil range), if any
+                    start_myrange = myrange[0]
+                    end_myrange = myrange[0]+myrange[1]-1
+                    start_mymap = mymapping[1]
+                    end_mymap = mymapping[1]+mymapping[2]-1
+                    overlap_start = max([start_myrange, start_mymap])
+                    overlap_end = min([end_myrange, end_mymap])
+                    if overlap_start <= overlap_end:
+                        overlap = [overlap_start-diff, overlap_end-overlap_start+1]
+                        processed_ranges.append(overlap)
+                        print (f"        Found overlap from {overlap_start} to {overlap_end} CONV {diff}")     
+                        did_process = True                   
+                        # any unmapped range *before* the overlap is not going
+                        # to be mapped to a new range (because I've sorted the
+                        # initial seeds and all the mappings))
+                        if overlap_start > start_myrange:
+                            processed_ranges.append([start_myrange, overlap_start-start_myrange])
+                            did_process = True
+                            print (f"        Start overlap has no map {start_myrange} to {overlap_start-1}")
+                        # any unmapped range *after* the overlap COULD be
+                        # mapped by a subsequent mapping so we need to keep it
+                        # in our list of unprocessed ranges
+                        if end_myrange > overlap_end:
+                            unprocessed_ranges.append([overlap_end+1,end_myrange-overlap_end])
+                            print (f"        End range could be processed in later mapping from {overlap_end+1} to {end_myrange}")
+                        break
+                    else:
+                        # no overlap
+                        # unprocessed_ranges.append(myrange)
+                        print (f"        No overlap so try next mapping")
+                
+                # if we're out of mappings to search over, then all
+                # remaining unprocessed_ranges are converted as-is
+                if not did_process:
+                    processed_ranges.append(myrange)
+
+            break
+
+    # update for next iteration
+    from_tag = to_tag
+
+    # sort the new processed ranges by starting index
+    new_processed_ranges = sort_list_of_lists (processed_ranges, 0)
+    start_ranges = new_processed_ranges
+
+    if from_tag == "location":
+        location_found = True
+        # smallest location should be the very first # in the firs trange
+        print (start_ranges[0][0])
+
 
  
