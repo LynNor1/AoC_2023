@@ -102,7 +102,7 @@ while not location_found:
             processed_ranges = list()
             unprocessed_ranges = start_ranges
 
-            # loop over all the "seed" ranges
+            # loop over all the unmapped ranges
             while len(unprocessed_ranges) > 0:
 
                 # grab 1st range
@@ -114,7 +114,7 @@ while not location_found:
 
                 did_process = False
 
-                # loop over all the "soil" mappings
+                # loop over all the mappings
                 for mymapping in mymappings:
                     diff = mymapping[1]-mymapping[0]                    
                     print (f"      Looking at mapping: {mymapping[1]} to {mymapping[1]+mymapping[2]-1} CONV {diff}")
@@ -146,11 +146,10 @@ while not location_found:
                         break
                     else:
                         # no overlap
-                        # unprocessed_ranges.append(myrange)
                         print (f"        No overlap so try next mapping")
                 
-                # if we're out of mappings to search over, then all
-                # remaining unprocessed_ranges are converted as-is
+                # if we're out of mappings to search over, then the
+                # current unprocessed range is converted as-is
                 if not did_process:
                     processed_ranges.append(myrange)
 
