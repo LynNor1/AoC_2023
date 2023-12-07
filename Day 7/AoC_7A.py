@@ -1,7 +1,7 @@
 import os
 import math
 
-filename = "input_data.txt"
+filename = "test_data.txt"
 
 # Using readlines()
 __location__ = os.path.realpath(
@@ -100,11 +100,11 @@ for ht in range(6):
             new_hand_types[m_idx] = hand_types[list_to_sort[idx][1]]
         hand_types = new_hand_types
 
-# print final card list
-# print ("Sorted cards:")
-# for hand_type in hand_types:
-#     og_idx = hand_type[1]
-#     print (f"{og_idx}) {cards[og_idx]} bet {bets[og_idx]} score {hand_type[0]}")
+#print final card list
+print ("Sorted cards:")
+for hand_type in hand_types:
+    og_idx = hand_type[1]
+    print (f"{og_idx}) {cards[og_idx]} ({sub_cards[og_idx]}) bet {bets[og_idx]} score {hand_type[0]}")
 
 # compute score
 score = 0
