@@ -9,7 +9,7 @@ __location__ = os.path.realpath(
 file1 = open(os.path.join(__location__, filename), 'r')
 Lines = file1.readlines()
 
-card_list = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+card_list = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J']
 sub_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
 cards = list()
 bets = list()
@@ -31,6 +31,7 @@ for line in Lines:
 # 6) high card
 
 hand_types = [0 for x in range(len(cards))]
+hand_msgs = ["5-of-a-kind", "4-of-a-kind", "full house", "3 of a kind", "2 pairs", "1 pair", "high card"]
 
 # Establish type of hand for each hand
 for idx in range(len(cards)):
@@ -40,21 +41,45 @@ for idx in range(len(cards)):
         # get index of this char in the char_list
         i = card_list.index(char)
         count_list[i] += 1
+    num_jokers = count_list[12]
+    num_5count = count_list.count(5)
+    # the following need to exclude jokers as part of their count
+    num_4count = count_list[0:12].count(4) 
+    num_3count = count_list[0:12].count(3)
+    num_2count = count_list[0:12].count(2)
+    num_1count = count_list[0:12].count(1)
     # check for all of the different hand types
-    if 5 in count_list:
+    if num_5count==1 or (num_4count==1 and num_jokers==1) or (num_3count==1 and num_jokers==2) or (num_2count==1 and num_jokers==3) or (num_1count==1 and num_jokers==4):
         hand_types[idx] = (0, idx)
-    elif 4 in count_list:
+        if (num_jokers > 0):
+            print (f"  {idx}) {cards[idx]} scored as 5-of-a-kind")
+    elif num_4count==1 or (num_3count==1 and num_jokers==1) or (num_2count==1 and num_jokers==2) or (num_1count==1 and num_jokers==3):
         hand_types[idx] = (1, idx)
-    elif 3 in count_list and 2 in count_list:
+        if (num_jokers > 0):
+            print (f"  {idx}) {cards[idx]} scored as 4-of-a-kind")        
+    elif (num_3count==1 and num_2count==1) or (num_2count==2 and num_jokers==1) or (num_3count==1 and num_jokers==1) or (num_2count==1 and num_jokers==2):
         hand_types[idx] = (2, idx)
-    elif 3 in count_list:
+        if (num_jokers > 0):
+            print (f"  {idx}) {cards[idx]} scored as full house")            
+    elif num_3count==1 or (num_2count==1 and num_jokers==1) or num_jokers == 2:
         hand_types[idx] = (3, idx)
-    elif count_list.count(2) == 2:
+        if (num_jokers > 0):
+            print (f"  {idx}) {cards[idx]} scored as 3-of-a-kind")                
+    elif num_2count==2:
         hand_types[idx] = (4, idx)
-    elif 2 in count_list:
+        if (num_jokers > 0):
+            print (f"  {idx}) {cards[idx]} scored as 2 pairs")            
+    elif num_2count==1 or num_jokers==1:
         hand_types[idx] = (5, idx)
+        if (num_jokers > 0):
+            print (f"  {idx}) {cards[idx]} scored as 1 pair")              
+    elif num_jokers == 3:
+        hand_types[idx] = (1, idx)
+        print (f"  {idx}) {cards[idx]} scored as 4-of-a-kind")   
     else:
         hand_types[idx] = (6, idx)
+        if (num_jokers > 0):
+            print ("SOMETHING IS WRONG!")
 
 # now sort hands by hand_type
 # hand_types.sort()
@@ -75,7 +100,10 @@ for card in cards:
 print ("Unsorted cards:")
 for hand_type in hand_types:
     og_idx = hand_type[1]
-    print (f"{og_idx}) {cards[og_idx]} bet {bets[og_idx]} score {hand_type[0]}")
+    extra_msg = ""
+    if cards[og_idx].count('J') > 0:
+        extra_msg = "*"    
+    print (f"{og_idx}) {cards[og_idx]} bet {bets[og_idx]} {hand_msgs[hand_type[0]]} {extra_msg}")
 
 # now sort the ties by highest card from left
 sorted_hand_types = list()
@@ -110,7 +138,10 @@ print (f"Total count {total_count}")
 print ("Sorted cards:")
 for hand_type in sorted_hand_types:
     og_idx = hand_type[1]
-    print (f"{og_idx}) {cards[og_idx]} ({sub_cards[og_idx]}) bet {bets[og_idx]} score {hand_type[0]}")
+    extra_msg = ""
+    if cards[og_idx].count('J') > 0:
+        extra_msg = "*"
+    print (f"{og_idx}) {cards[og_idx]} ({sub_cards[og_idx]}) bet {bets[og_idx]} {hand_msgs[hand_type[0]]} {extra_msg}")
 
 # compute score
 score = 0
