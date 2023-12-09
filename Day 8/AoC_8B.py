@@ -71,13 +71,20 @@ for goal in starting_goals:
     finished_loop = False
     found_z = False
     encountered = list()
-    encountered.append(goal)
+    z_offset = -1
     while not finished_loop:
+
        # get next step (R or L)
         step = instructions[next_step_idx]
         next_step_idx += 1
         if next_step_idx == num_steps:
             next_step_idx = 0
+
+        # save current goal + the direction
+        encountered.append(next_goal+step)
+
+        # now get next step (R or L) for next goal
+        next_step = instructions[next_step_idx]
 
         map = maps[next_goal]
         # get next location
@@ -86,48 +93,28 @@ for goal in starting_goals:
         else:
             next_goal = map[0]
 
-        if count_steps%100 == 0:
-            print (f"  at count {count_steps} {next_goal}")
+        # if count_steps%100 == 0:
+        #     print (f"  at count {count_steps} {next_goal} {next_step}")
 
         count_steps += 1
 
         if not found_z and next_goal.endswith("Z"):
             found_z = True
             z_steps.append(count_steps)
-            z_offset = count_steps        
+            z_offset = count_steps    
+            z_goal = next_goal    
 
-        if next_goal in encountered:
+        if (count_steps-1)%num_steps == 0 and found_z and (next_goal+next_step) in encountered:
+            count_steps -= 1
             finished_loop = True
             break
 
-        encountered.append(next_goal)
-
     cycles.append(count_steps)
 
-    print (f"cycles for goal {goal}: {count_steps} z offset: {z_offset}")
+    # the number of steps in the cycle needs to be evenly divisible by the # of
+    # steps in the instruction
+    print (f"  cycles for goal {goal} to {z_goal}: {count_steps} {count_steps/num_steps} Z encountered at step {z_offset}")
 
-# count_steps = 0
-# while not all_goals_end_with_z (at_goals):
-#     # get next step (R or L)
-#     step = instructions[next_step_idx]
-#     next_step_idx += 1
-#     if next_step_idx == num_steps:
-#         next_step_idx = 0
-
-#     # move to next location for all goals
-#     new_goals = list()
-#     for goal in at_goals:
-#         # get map for current location
-#         map = maps[goal]
-#         # get next location
-#         if step == 'R':
-#             new_goals.append(map[1])
-#         else:
-#             new_goals.append(map[0])
-#     at_goals = new_goals
-
-#     if count_steps%100 == 0:
-#         print (f"step {count_steps} {at_goals}")
-#     count_steps += 1
-
-print(count_steps)
+# least common multiple
+lcm = math.lcm(*cycles)
+print(lcm)
