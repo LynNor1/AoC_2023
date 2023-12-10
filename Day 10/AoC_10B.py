@@ -177,40 +177,9 @@ while not finished:
 
 print (math.floor(steps/2)+1)
 
+print ("Clean map with loop:")
 for row in range(num_rows):
     print (convert(clean_map[row]))
-
-def mark_is_empty_to_right():
-    global clean_map        
-    if cur_col < num_cols-1 and clean_map[cur_row][cur_col+1] == empty_char:
-        clean_map[cur_row][cur_col+1] = inside_char
-        if do_print:
-            for row in range(num_rows):
-                print (convert(clean_map[row]))     
-
-def mark_is_empty_to_left():
-    global clean_map    
-    if cur_col > 0 and clean_map[cur_row][cur_col-1] == empty_char:
-        clean_map[cur_row][cur_col-1] = inside_char    
-        if do_print:
-            for row in range(num_rows):
-                print (convert(clean_map[row]))              
-    
-def mark_is_empty_above():
-    global clean_map        
-    if cur_row > 0 and clean_map[cur_row-1][cur_col] == empty_char:
-        clean_map[cur_row-1][cur_col] = inside_char
-        if do_print:
-            for row in range(num_rows):
-                print (convert(clean_map[row]))     
-
-def mark_is_empty_below():
-    global clean_map        
-    if cur_row < num_rows-1 and clean_map[cur_row+1][cur_col] == empty_char:
-        clean_map[cur_row+1][cur_col] = inside_char
-        if do_print:
-            for row in range(num_rows):
-                print (convert(clean_map[row]))    
 
 def mark_is_empty(row_incr, col_incr):
     global clean_map
@@ -328,7 +297,7 @@ while not finished:
     if next_char == 'S':
         finished = True
 
-print ("Initial clean map:")
+print ("First pass marking empty spaces-to-left:")
 for row in range(num_rows):
     print (convert(clean_map[row]))        
 
